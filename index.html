@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>3D Moss & Flower Text — Crafted for the roads of Sri Lanka</title>
+  <title>3D Moss & Flower Text </title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -115,12 +115,12 @@
 
         <!-- The 3D WebGL Canvas -->
         <div id="canvasContainer" class="w-full h-[380px] sm:h-[440px] md:h-[480px] relative cursor-pointer">
-          <canvas id="mossCanvas" role="img" aria-label="Crafted for the roads of Sri Lanka" class="w-full h-full block"></canvas>
+          <canvas id="mossCanvas" role="img" aria-label="3D Moss Text" class="w-full h-full block"></canvas>
         </div>
 
         <!-- Bottom subtle caption inside canvas -->
         <div class="px-5 py-2.5 bg-black/40 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400">
-          <span>Phrase: <strong id="activePhraseLabel" class="text-zinc-200">"Crafted for the roads of Sri Lanka"</strong></span>
+          <span>Phrase: <strong id="activePhraseLabel" class="text-zinc-200">"3D Moss Text"</strong></span>
           <span class="text-[11px] text-zinc-500">Tip: Move your cursor directly over the moss blades to brush them aside</span>
         </div>
       </div>
@@ -139,7 +139,7 @@
             <input 
               id="textInput" 
               type="text" 
-              value="Crafted for the roads of Sri Lanka"
+              value="3D Moss Text"
               placeholder="Enter text..."
               class="w-full bg-black/50 border border-zinc-700/80 focus:border-[#c9e04a] rounded-xl px-3.5 py-2 text-sm text-white outline-none transition-colors"
             />
@@ -195,7 +195,7 @@
         <!-- Animation Speed Slider -->
         <div class="bg-black/35 rounded-xl px-3.5 py-2.5 border border-white/5">
           <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="text-zinc-300 font-medium">Animation Speed (වේගය)</span>
+            <span class="text-zinc-300 font-medium">Animation Speed</span>
             <span id="speedValLabel" class="text-[#e8a23a] font-mono font-semibold">1.0x</span>
           </div>
           <input id="animSpeedSlider" type="range" min="0.2" max="2.5" step="0.1" value="1.0" class="w-full accent-[#e8a23a] cursor-pointer h-1.5 bg-zinc-800 rounded-lg" />
@@ -204,7 +204,7 @@
         <!-- Cursor Brush Strength Slider -->
         <div class="bg-black/35 rounded-xl px-3.5 py-2.5 border border-white/5">
           <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="text-zinc-300 font-medium">Cursor Brush (නැමෙන ප්‍රමාණය)</span>
+            <span class="text-zinc-300 font-medium">Cursor Brush</span>
             <span id="brushValLabel" class="text-[#c9e04a] font-mono font-semibold">1.0x</span>
           </div>
           <input id="brushStrengthSlider" type="range" min="0" max="2.5" step="0.1" value="1.0" class="w-full accent-[#c9e04a] cursor-pointer h-1.5 bg-zinc-800 rounded-lg" />
@@ -213,7 +213,7 @@
         <!-- Wind Sway Speed/Intensity Slider -->
         <div class="bg-black/35 rounded-xl px-3.5 py-2.5 border border-white/5">
           <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="text-zinc-300 font-medium">Wind Sway (සුළඟේ ප්‍රමාණය)</span>
+            <span class="text-zinc-300 font-medium">Wind Sway</span>
             <span id="windValLabel" class="text-[#c9e04a] font-mono font-semibold">1.0x</span>
           </div>
           <input id="windStrengthSlider" type="range" min="0" max="2.5" step="0.1" value="1.0" class="w-full accent-[#c9e04a] cursor-pointer h-1.5 bg-zinc-800 rounded-lg" />
@@ -222,7 +222,7 @@
         <!-- Floating Flower Petals Count Slider -->
         <div class="bg-black/35 rounded-xl px-3.5 py-2.5 border border-white/5">
           <div class="flex items-center justify-between text-xs mb-1.5">
-            <span class="text-zinc-300 font-medium">Floating Petals (මල් පෙති ගණන)</span>
+            <span class="text-zinc-300 font-medium">Floating Petals</span>
             <span id="petalsValLabel" class="text-[#e9a6c9] font-mono font-semibold">3 Petals</span>
           </div>
           <input id="petalCountSlider" type="range" min="0" max="10" step="1" value="3" class="w-full accent-[#e9a6c9] cursor-pointer h-1.5 bg-zinc-800 rounded-lg" />
@@ -270,7 +270,7 @@
     /* =========================================================================
        EXACT PORT OF YOUR THREE.JS + OPENTYPE.JS MOSS SHADER LOGIC
        Enhanced with multi-line support for long sentences like:
-       "Crafted for the roads of Sri Lanka"
+       "3D Moss Text"
        ========================================================================= */
 
     const THEMES = {
@@ -569,7 +569,7 @@
     let rebuildFloatingPetals = null;
 
     let state = {
-      text: "Crafted for the roads of Sri Lanka",
+      text: "3D Moss Text",
       multiLine: true,
       fontKey: "serif",
       animSpeed: 1.0,
@@ -913,7 +913,7 @@
       // Custom Text Input
       const textInput = document.getElementById("textInput");
       const triggerTextUpdate = () => {
-        state.text = textInput.value || "Crafted for the roads of Sri Lanka";
+        state.text = textInput.value || "3D Moss Text";
         renderMossScene();
       };
       document.getElementById("applyTextBtn").addEventListener("click", triggerTextUpdate);
