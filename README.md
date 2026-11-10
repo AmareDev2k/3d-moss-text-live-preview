@@ -19,8 +19,6 @@ A real-time WebGL text effect built with Three.js, opentype.js and custom GLSL s
 
 
 
-https://github.com/user-attachments/assets/303f3e42-dadf-4e7c-8a0e-2b4714fc1bb7
-
 
 
 ---
