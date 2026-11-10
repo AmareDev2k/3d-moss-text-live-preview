@@ -18,6 +18,7 @@ A real-time WebGL text effect built with Three.js, opentype.js and custom GLSL s
 </div>
 
 
+<img width="1280" height="720" alt="2026-11-10 12-40-01" src="https://github.com/user-attachments/assets/0e9a3bc8-c126-42c8-bf9c-90a20271f329" />
 
 
 
