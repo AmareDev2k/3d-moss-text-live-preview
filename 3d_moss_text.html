@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Moss & Flower Text — Crafted for the roads of Sri Lanka</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  
+  <!-- Three.js & Opentype.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+
+  <style>
+    body {
+      background-color: #080a06;
+      color: #f3f5f0;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    .serif-title {
+      font-family: 'Instrument Serif', serif;
+    }
+    .glass-panel {
+      background: rgba(16, 20, 13, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(163, 204, 57, 0.16);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .double-bezel {
+      padding: 4px;
+      background: linear-gradient(145deg, rgba(163,204,57,0.18), rgba(232,162,58,0.08), rgba(15,19,12,0.9));
+      border-radius: 20px;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0d08; }
+    ::-webkit-scrollbar-thumb { background: #2d3819; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #4a5d26; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-[#a3cc39]/30 selection:text-[#e2f59e]">
+
+  <!-- Ambient Background Glow -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[850px] h-[420px] rounded-full bg-[#4e6914]/15 blur-[130px]"></div>
+    <div class="absolute bottom-10 right-1/4 w-[500px] h-[300px] rounded-full bg-[#d4942a]/10 blur-[140px]"></div>
+  </div>
+
+  <!-- Top Header Bar -->
+  <header class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 pt-5 pb-2 flex flex-wrap items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7a9a12] to-[#2f3d08] flex items-center justify-center border border-[#c9e04a]/30 shadow-lg shadow-[#7a9a12]/10">
+        <svg class="w-5 h-5 text-[#e8f5a2]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs uppercase tracking-[0.2em] text-[#a9c94a] font-semibold">WebGL Shader Preview</span>
+          <span id="statusBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#7a9a12]/20 text-[#c9e04a] border border-[#c9e04a]/25">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#c9e04a] animate-pulse"></span>
+            <span id="statusText">Loading Font...</span>
+          </span>
+        </div>
+        <h1 class="text-sm sm:text-base text-zinc-300 font-medium">Next.js <code class="text-[#e8a23a] bg-white/5 px-1.5 py-0.5 rounded text-xs">&lt;MossText /&gt;</code> Interactive Sandbox</h1>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <button id="replayBtn" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#7a9a12] to-[#5d780c] hover:from-[#8cb017] hover:to-[#6c8b10] text-white font-medium text-xs sm:text-sm shadow-lg shadow-[#7a9a12]/20 border border-[#c9e04a]/30 transition-all active:scale-95 cursor-pointer">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        Replay Grow Animation
+      </button>
+      <button id="copyCodeBtn" class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-zinc-900/90 hover:bg-zinc-800 text-zinc-200 font-medium text-xs sm:text-sm border border-zinc-700/70 transition-all active:scale-95 cursor-pointer">
+        <svg class="w-4 h-4 text-[#e8a23a]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+        </svg>
+        <span id="copyBtnText">Copy Next.js Code</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main 3D Canvas Showcase Area -->
+  <main class="relative z-10 flex-1 flex flex-col items-center justify-center w-full max-w-7xl mx-auto px-4 sm:px-8 my-2">
+    <div class="w-full double-bezel">
+      <div class="relative w-full rounded-[16px] bg-gradient-to-b from-[#0d110a] via-[#090c07] to-[#060805] border border-white/5 overflow-hidden shadow-2xl">
+        
+        <!-- Subtle Top Metadata Bar inside Canvas Frame -->
+        <div class="absolute top-3 left-4 right-4 z-20 flex items-center justify-between pointer-events-none text-[11px] text-zinc-400">
+          <div class="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+            <span class="text-[#c9e04a] font-semibold">Interactive Brush:</span>
+            <span>Hover over letters to part the moss &amp; flowers</span>
+          </div>
+          <div id="statsCounter" class="hidden sm:flex items-center gap-3 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 font-mono">
+            <span>Moss Blades: <strong id="bladeCount" class="text-[#c9e04a]">0</strong></span>
+            <span>•</span>
+            <span>Flowers: <strong id="flowerCount" class="text-[#e9a6c9]">0</strong></span>
+            <span>•</span>
+            <span>Floating Petals: <strong id="petalCountLabel" class="text-[#fbeaf3]">3</strong></span>
+          </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#080a06]/90 backdrop-blur-sm transition-opacity duration-500">
+          <div class="w-12 h-12 rounded-full border-2 border-[#c9e04a]/20 border-t-[#c9e04a] animate-spin mb-3"></div>
+          <p class="text-sm text-zinc-300 font-medium">Generating 3D Moss & Flower Geometry...</p>
+          <p class="text-xs text-zinc-500 mt-1">Parsing vector font paths via opentype.js</p>
+        </div>
+
+        <!-- The 3D WebGL Canvas -->
+        <div id="canvasContainer" class="w-full h-[380px] sm:h-[440px] md:h-[480px] relative cursor-pointer">
+          <canvas id="mossCanvas" role="img" aria-label="Crafted for the roads of Sri Lanka" class="w-full h-full block"></canvas>
+        </div>
+
+        <!-- Bottom subtle caption inside canvas -->
+        <div class="px-5 py-2.5 bg-black/40 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400">
+          <span>Phrase: <strong id="activePhraseLabel" class="text-zinc-200">"Crafted for the roads of Sri Lanka"</strong></span>
+          <span class="text-[11px] text-zinc-500">Tip: Move your cursor directly over the moss blades to brush them aside</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Interactive Control Bar -->
+  <section class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 pb-6 pt-2">
+    <div class="glass-panel rounded-2xl p-4 sm:p-5">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+        
+        <!-- Text Input -->
+        <div class="md:col-span-4">
+          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Custom Text Phrase</label>
+          <div class="flex gap-2">
+            <input 
+              id="textInput" 
+              type="text" 
+              value="Crafted for the roads of Sri Lanka"
+              placeholder="Enter text..."
+              class="w-full bg-black/50 border border-zinc-700/80 focus:border-[#c9e04a] rounded-xl px-3.5 py-2 text-sm text-white outline-none transition-colors"
+            />
+            <button id="applyTextBtn" class="px-3.5 py-2 rounded-xl bg-[#c9e04a]/15 hover:bg-[#c9e04a]/25 text-[#c9e04a] border border-[#c9e04a]/30 text-xs font-semibold transition-all shrink-0 cursor-pointer">
+              Render
+            </button>
+          </div>
+        </div>
+
+        <!-- Layout Mode (2-Line vs 1-Line) -->
+        <div class="md:col-span-3">
+          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Line Wrapping (Best for Long Text)</label>
+          <div class="grid grid-cols-2 gap-1.5 bg-black/50 p-1 rounded-xl border border-zinc-800">
+            <button id="layoutMultiBtn" class="py-1.5 px-2.5 rounded-lg text-xs font-medium bg-[#7a9a12] text-white shadow transition-all cursor-pointer">
+              2-Line Stacked
+            </button>
+            <button id="layoutSingleBtn" class="py-1.5 px-2.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-all cursor-pointer">
+              1-Line Wide
+            </button>
+          </div>
+        </div>
+
+        <!-- Font Style -->
+        <div class="md:col-span-2">
+          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Font Face (.ttf/.woff)</label>
+          <select id="fontSelect" class="w-full bg-black/50 border border-zinc-700/80 focus:border-[#c9e04a] rounded-xl px-3 py-2 text-xs sm:text-sm text-zinc-200 outline-none cursor-pointer">
+            <option value="serif">Instrument Serif (Luxury)</option>
+            <option value="sans">Plus Jakarta Bold (Thick Moss)</option>
+          </select>
+        </div>
+
+        <!-- Theme Preset -->
+        <div class="md:col-span-3">
+          <label class="block text-xs font-medium text-zinc-400 mb-1.5">Sri Lanka Flora Palette</label>
+          <div class="grid grid-cols-3 gap-1.5">
+            <button data-theme="ella" class="theme-btn py-2 px-2 rounded-xl text-xs font-medium border border-[#c9e04a] bg-[#2f3d08]/60 text-[#e2f59e] flex items-center justify-center gap-1.5 cursor-pointer">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#c9e04a]"></span> Ella Lush
+            </button>
+            <button data-theme="ceylon" class="theme-btn py-2 px-2 rounded-xl text-xs font-medium border border-zinc-700/70 bg-black/40 text-zinc-300 hover:border-amber-400/50 flex items-center justify-center gap-1.5 cursor-pointer">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#f5b841]"></span> Golden Tea
+            </button>
+            <button data-theme="horton" class="theme-btn py-2 px-2 rounded-xl text-xs font-medium border border-zinc-700/70 bg-black/40 text-zinc-300 hover:border-teal-400/50 flex items-center justify-center gap-1.5 cursor-pointer">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#6ee7b7]"></span> Mist Bloom
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Animation & Floating Petals Sliders Row -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4 pt-4 border-t border-white/10">
+        
+        <!-- Animation Speed Slider -->
+        <div class="bg-black/35 rounded-xl px-3.5 py-2.5 border border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="text-zinc-300 font-medium">Animation Speed (වේගය)</span>
+            <span id="speedValLabel" class="text-[#e8a23a] font-mono font-semibold">1.0x</span>
+          </div>
+          <input id="animSpeedSlider" type="range" min="0.2" max="2.5" step="0.1" value="1.0" class="w-full accent-[#e8a23a] cursor-pointer h-1.5 bg-zinc-800 rounded-lg" />
+        </div>
+
+        <!-- Cursor Brush Strength Slider -->
+        <div class="bg-black/35 rounded-xl px-3.5 py-2.5 border border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="text-zinc-300 font-medium">Cursor Brush (නැමෙන ප්‍රමාණය)</span>
+            <span id="brushValLabel" class="text-[#c9e04a] font-mono font-semibold">1.0x</span>
+          </div>
+          <input id="brushStrengthSlider" type="range" min="0" max="2.5" step="0.1" value="1.0" class="w-full accent-[#c9e04a] cursor-pointer h-1.5 bg-zinc-800 rounded-lg" />
+        </div>
+
+        <!-- Wind Sway Speed/Intensity Slider -->
+        <div class="bg-black/35 rounded-xl px-3.5 py-2.5 border border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="text-zinc-300 font-medium">Wind Sway (සුළඟේ ප්‍රමාණය)</span>
+            <span id="windValLabel" class="text-[#c9e04a] font-mono font-semibold">1.0x</span>
+          </div>
+          <input id="windStrengthSlider" type="range" min="0" max="2.5" step="0.1" value="1.0" class="w-full accent-[#c9e04a] cursor-pointer h-1.5 bg-zinc-800 rounded-lg" />
+        </div>
+
+        <!-- Floating Flower Petals Count Slider -->
+        <div class="bg-black/35 rounded-xl px-3.5 py-2.5 border border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1.5">
+            <span class="text-zinc-300 font-medium">Floating Petals (මල් පෙති ගණන)</span>
+            <span id="petalsValLabel" class="text-[#e9a6c9] font-mono font-semibold">3 Petals</span>
+          </div>
+          <input id="petalCountSlider" type="range" min="0" max="10" step="1" value="3" class="w-full accent-[#e9a6c9] cursor-pointer h-1.5 bg-zinc-800 rounded-lg" />
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Export Code Modal (Shows Full Next.js Component with all current settings) -->
+  <div id="codeModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4">
+    <div class="glass-panel w-full max-w-4xl rounded-2xl border border-[#c9e04a]/30 overflow-hidden shadow-2xl flex flex-col max-h-[88vh]">
+      <div class="px-5 py-4 bg-black/60 border-b border-white/10 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 class="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-[#c9e04a]"></span>
+            Full Next.js Component (<code class="text-[#e8a23a]">components/MossText.jsx</code>)
+          </h3>
+          <p class="text-xs text-zinc-400 mt-0.5">Includes your exact Speed, Cursor Brush, Wind Sway, Floating Petals &amp; Multi-line settings</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="modalCopyBtn" class="px-4 py-2 rounded-xl bg-[#7a9a12] hover:bg-[#8cb017] text-white text-xs font-semibold transition-all cursor-pointer">
+            Copy Full File Code
+          </button>
+          <button id="closeModalBtn" class="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition-all cursor-pointer">
+            Close
+          </button>
+        </div>
+      </div>
+      <div class="p-4 overflow-y-auto flex-1 bg-[#060804]">
+        <pre id="exportedCodeBlock" class="text-[11px] sm:text-xs font-mono text-zinc-200 leading-relaxed overflow-x-auto select-all"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification for Code Copy -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 pointer-events-none opacity-0 translate-y-3 transition-all duration-300 bg-[#1a2212] border border-[#c9e04a]/40 text-[#e2f59e] px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs sm:text-sm">
+    <svg class="w-5 h-5 text-[#c9e04a]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
+    </svg>
+    <span>Full Next.js component (with Speed, Brush &amp; Petals) copied!</span>
+  </div>
+
+  <script>
+    /* =========================================================================
+       EXACT PORT OF YOUR THREE.JS + OPENTYPE.JS MOSS SHADER LOGIC
+       Enhanced with multi-line support for long sentences like:
+       "Crafted for the roads of Sri Lanka"
+       ========================================================================= */
+
+    const THEMES = {
+      ella: {
+        mossBase: "#2f3d08", mossMid: "#7a9a12", mossTip: "#c9e04a", soil: "#2a2414",
+        petalIn: "#e9a6c9", petalEdge: "#fbeaf3", center: "#e8a23a", stem: "#d0623e",
+      },
+      ceylon: {
+        mossBase: "#2b3309", mossMid: "#6c7d14", mossTip: "#e6c245", soil: "#261e12",
+        petalIn: "#f59e0b", petalEdge: "#fef3c7", center: "#ffffff", stem: "#84a91c",
+      },
+      horton: {
+        mossBase: "#0f3528", mossMid: "#1e7a56", mossTip: "#7ce8b7", soil: "#16241e",
+        petalIn: "#c084fc", petalEdge: "#f3e8ff", center: "#fbbf24", stem: "#34d399",
+      }
+    };
+
+    const FONTS = {
+      serif: [
+        "https://cdn.jsdelivr.net/npm/@fontsource/instrument-serif@5.0.8/files/instrument-serif-latin-400-normal.woff",
+        "https://fonts.gstatic.com/s/instrumentserif/v4/jizBRFtNs2ka5fXjeivQ4LroWlx-2zI.ttf",
+        "https://cdn.jsdelivr.net/npm/@fontsource/playfair-display@5.0.8/files/playfair-display-latin-700-normal.woff"
+      ],
+      sans: [
+        "https://cdn.jsdelivr.net/npm/@fontsource/plus-jakarta-sans@5.0.8/files/plus-jakarta-sans-latin-700-normal.woff",
+        "https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmWUlfBBc9.ttf",
+        "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/files/inter-latin-700-normal.woff"
+      ]
+    };
+
+    let currentTheme = "ella";
+    let C = { ...THEMES[currentTheme] };
+    const DEPTH = 0.06; // letter thickness (em units)
+    const GROW = 1.1;   // seconds a blade takes to grow
+
+    const COMMON = /* glsl */ `
+    uniform float uTime; uniform float uWind;
+    uniform vec2 uMouse; uniform vec2 uMouseVel; uniform float uHover;
+    uniform float uBrushStrength; uniform float uBrushRadius;
+    float ease(float a){ float b=a-1.0; return 1.0+2.70158*b*b*b+1.70158*b*b; }
+    mat3 basis(vec3 n){
+      vec3 up = abs(n.y)<0.98 ? vec3(0.,1.,0.) : vec3(1.,0.,0.);
+      vec3 t = normalize(cross(up,n));
+      return mat3(t, n, cross(n,t));
+    }
+    vec3 sway(vec3 p, float s){
+      return vec3(sin(uTime*1.1+p.x*2.0+s*30.0), cos(uTime*0.8+p.y*2.0+s*20.0)*0.6, 0.0)*uWind;
+    }
+    vec3 interact(vec3 p, float weight){
+      vec2 d = p.xy - uMouse;
+      float dist = length(d);
+      float f = smoothstep(uBrushRadius, 0.0, dist) * uHover * uBrushStrength;
+      vec2 pushDir = dist > 0.0001 ? normalize(d) : vec2(0.0, 1.0);
+      vec2 disp = (pushDir * 0.14 + uMouseVel * 0.09) * f * weight;
+      return vec3(disp, -0.05 * f * weight);
+    }`;
+
+    const MOSS_VS = /* glsl */ `${COMMON}
+    attribute float aH; attribute vec3 iPos; attribute vec3 iDir; attribute vec4 iData; // scale, rot, delay, seed
+    varying float vH; varying float vJ;
+    void main(){
+      float g = ease(clamp((uTime-iData.z)/${GROW.toFixed(2)}, 0.0, 1.0));
+      float c=cos(iData.y), s=sin(iData.y);
+      vec3 p = position;
+      p.xz = mat2(c,-s,s,c)*p.xz;
+      p *= iData.x*g; p.y *= 1.35;
+      vec3 local = iPos + basis(normalize(iDir))*p;
+      local += sway(iPos, iData.w)*aH*aH*iData.x*0.45*g;
+      local += interact(iPos, aH * g);
+      gl_Position = projectionMatrix*modelViewMatrix*vec4(local,1.0);
+      vH=aH; vJ=fract(iData.w*13.37);
+    }`;
+
+    const MOSS_FS = /* glsl */ `
+    uniform vec3 uBase; uniform vec3 uMid; uniform vec3 uTip;
+    varying float vH; varying float vJ;
+    void main(){
+      vec3 c = mix(uBase,uMid,smoothstep(0.0,0.6,vH));
+      c = mix(c,uTip,smoothstep(0.5,1.0,vH)*(0.55+0.45*vJ));
+      c *= (0.82+0.36*vJ)*mix(0.42,1.0,smoothstep(0.0,0.8,vH))*1.15;
+      gl_FragColor = vec4(c,1.0);
+    }`;
+
+    const FLOWER_VS = /* glsl */ `${COMMON}
+    attribute float aKind; attribute float aR; attribute vec3 iPos; attribute vec3 iDir; attribute vec4 iData; // stemLen, head, delay, seed
+    varying float vKind; varying float vR;
+    void main(){
+      float g = ease(clamp((uTime-iData.z)/${GROW.toFixed(2)}, 0.0, 1.0));
+      vec3 n = normalize(iDir);
+      float len = iData.x*g;
+      vec3 sw = sway(iPos, iData.w)*len*0.35 + interact(iPos, 1.15 * g);
+      vec3 local;
+      if (aKind < 0.5) {
+        float h = position.y;
+        local = iPos + n*len*h + sw*h*h + basis(n)[0]*position.x*0.006*(1.0-0.3*h);
+      } else {
+        float gh = ease(clamp((uTime-iData.z-0.25)/0.9, 0.0, 1.0));
+        mat3 B = basis(normalize(n+vec3(0.0,0.0,0.6)+sw*3.0));
+        local = iPos + n*len + sw + B*(position*iData.y*gh);
+      }
+      gl_Position = projectionMatrix*modelViewMatrix*vec4(local,1.0);
+      vKind=aKind; vR=aR;
+    }`;
+
+    const FLOWER_FS = /* glsl */ `
+    uniform vec3 uPetalIn; uniform vec3 uPetalEdge; uniform vec3 uCenter; uniform vec3 uStem;
+    varying float vKind; varying float vR;
+    void main(){
+      vec3 c = vKind<0.5 ? uStem : (vKind<1.5 ? mix(uPetalIn,uPetalEdge,smoothstep(0.15,1.0,vR)) : uCenter);
+      gl_FragColor = vec4(c,1.0);
+    }`;
+
+    const PETAL_FS = /* glsl */ `
+    uniform vec3 uPetalIn; uniform vec3 uPetalEdge;
+    varying float vR;
+    void main(){
+      vec3 c = mix(uPetalIn, uPetalEdge, smoothstep(0.1, 0.95, vR));
+      gl_FragColor = vec4(c, 0.96);
+    }`;
+
+    const PETAL_VS = /* glsl */ `
+    attribute float aR;
+    varying float vR;
+    void main(){
+      vR = aR;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }`;
+
+    /* ---------- geometry ---------- */
+    function singlePetalGeometry() {
+      const pos = [], rad = [], idx = [];
+      const v = (x, y, z, r) => { pos.push(x, y, z); rad.push(r); return pos.length / 3 - 1; };
+      const ctr = v(0, 0, 0, 0);
+      for (let i = 0; i <= 12; i++) {
+        const u = i / 12, a = (u - 0.5) * 1.35, r = Math.sin(u * Math.PI) ** 0.45;
+        // Gently cupped 3D flower petal shape
+        const x = Math.cos(a) * r;
+        const z = Math.sin(a) * r * 0.78;
+        const y = Math.sin(r * Math.PI) * 0.16 - r * r * 0.08;
+        v(x, y, z, r);
+      }
+      for (let i = 0; i < 12; i++) idx.push(ctr, ctr + i + 2, ctr + i + 1);
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      g.setAttribute("aR", new THREE.Float32BufferAttribute(rad, 1));
+      g.setIndex(idx);
+      return g;
+    }
+
+    function bladeGeometry() {
+      const pos = [], aH = [], idx = [], N = 7, SEG = 4;
+      for (let b = 0; b < N; b++) {
+        const a = (b / N) * Math.PI * 2, lean = b === 0 ? 0.1 : 0.6 + (b % 3) * 0.25;
+        const len = b === 0 ? 0.85 : 0.6 + (b % 4) * 0.1;
+        const dx = Math.cos(a), dz = Math.sin(a), px = -dz, pz = dx, base = pos.length / 3;
+        for (let i = 0; i <= SEG; i++) {
+          const t = i / SEG, out = Math.sin(lean * (0.4 + 0.9 * t)) * len * t;
+          const y = Math.cos(lean * 0.6 * t) * len * t, w = (0.15 * (1 - t * 0.85)) / 2;
+          pos.push(dx * out - px * w, y, dz * out - pz * w, dx * out + px * w, y, dz * out + pz * w);
+          aH.push(t, t);
+        }
+        for (let i = 0; i < SEG; i++) { const k = base + i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      g.setAttribute("aH", new THREE.Float32BufferAttribute(aH, 1));
+      g.setIndex(idx);
+      return g;
+    }
+
+    function flowerGeometry() {
+      const pos = [], kind = [], rad = [], idx = [];
+      const v = (x, y, z, k, r) => { pos.push(x, y, z); kind.push(k); rad.push(r); return pos.length / 3 - 1; };
+      for (let i = 0; i <= 6; i++) { const t = i / 6; v(-1, t, 0, 0, t); v(1, t, 0, 0, t); }
+      for (let i = 0; i < 6; i++) { const k = i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+      for (let p = 0; p < 5; p++) {
+        const ctr = v(0, 0, 0, 1, 0), a0 = (p / 5) * Math.PI * 2;
+        for (let i = 0; i <= 8; i++) {
+          const u = i / 8, a = a0 + (u - 0.5) * 1.2, r = Math.sin(u * Math.PI) ** 0.45;
+          v(Math.cos(a) * r, r * r * 0.1, Math.sin(a) * r, 1, r);
+        }
+        for (let i = 0; i < 8; i++) idx.push(ctr, ctr + i + 2, ctr + i + 1);
+      }
+      const mid = v(0, 0.08, 0, 2, 0);
+      for (let i = 0; i <= 10; i++) { const a = (i / 10) * Math.PI * 2; v(Math.cos(a) * 0.22, 0.05, Math.sin(a) * 0.22, 2, 0.1); }
+      for (let i = 0; i < 10; i++) idx.push(mid, mid + i + 2, mid + i + 1);
+      const g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+      g.setAttribute("aKind", new THREE.Float32BufferAttribute(kind, 1));
+      g.setAttribute("aR", new THREE.Float32BufferAttribute(rad, 1));
+      g.setIndex(idx);
+      return g;
+    }
+
+    function instanced(base, A) {
+      const g = new THREE.InstancedBufferGeometry();
+      g.index = base.index;
+      for (const k in base.attributes) g.setAttribute(k, base.attributes[k]);
+      g.setAttribute("iPos", new THREE.InstancedBufferAttribute(new Float32Array(A.iPos), 3));
+      g.setAttribute("iDir", new THREE.InstancedBufferAttribute(new Float32Array(A.iDir), 3));
+      g.setAttribute("iData", new THREE.InstancedBufferAttribute(new Float32Array(A.iData), 4));
+      g.instanceCount = A.iPos.length / 3;
+      return g;
+    }
+
+    /* ---------- font outline -> shapes (Supports 1-Line or Centered 2-Line) ---------- */
+    function splitIntoBalancedLines(text, multiLine) {
+      const clean = text.trim().replace(/\s+/g, " ");
+      if (!multiLine) return [clean];
+      const words = clean.split(" ");
+      if (words.length <= 2) return [clean];
+      // Find split point closest to half character length
+      const totalChars = clean.length;
+      let bestIdx = 1, bestDiff = Infinity, acc = 0;
+      for (let i = 0; i < words.length - 1; i++) {
+        acc += words[i].length + (i > 0 ? 1 : 0);
+        const diff = Math.abs(totalChars / 2 - acc);
+        if (diff < bestDiff) { bestDiff = diff; bestIdx = i + 1; }
+      }
+      return [words.slice(0, bestIdx).join(" "), words.slice(bestIdx).join(" ")];
+    }
+
+    function textShapes(font, text, multiLine = true) {
+      const lines = splitIntoBalancedLines(text, multiLine);
+      const sp = new THREE.ShapePath();
+      const lineHeight = 1.18;
+
+      lines.forEach((lineText, idx) => {
+        const advanceWidth = font.getAdvanceWidth(lineText, 1);
+        const offsetX = -advanceWidth / 2; // Center each line horizontally
+        const offsetY = idx * lineHeight;  // Stack lines downward in font space
+
+        for (const c of font.getPath(lineText, offsetX, offsetY, 1).commands) {
+          if (c.type === "M") sp.moveTo(c.x, -c.y);
+          else if (c.type === "L") sp.lineTo(c.x, -c.y);
+          else if (c.type === "Q") sp.quadraticCurveTo(c.x1, -c.y1, c.x, -c.y);
+          else if (c.type === "C") sp.bezierCurveTo(c.x1, -c.y1, c.x2, -c.y2, c.x, -c.y);
+          else if (c.type === "Z" && sp.currentPath?.curves.length) sp.currentPath.closePath();
+        }
+      });
+
+      return sp.toShapes();
+    }
+
+    function makeSampler(shapes, rand) {
+      const geo = new THREE.ShapeGeometry(shapes, 6), P = geo.attributes.position, I = geo.index;
+      const tris = [], cdf = []; let area = 0;
+      const vec = (i) => new THREE.Vector2().fromBufferAttribute(P, I.getX(i));
+      for (let i = 0; i < I.count; i += 3) {
+        const a = vec(i), b = vec(i + 1), c = vec(i + 2);
+        const ar = Math.abs((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) / 2;
+        if (ar > 0) { area += ar; tris.push([a, b, c]); cdf.push(area); }
+      }
+      geo.dispose();
+      const edges = [], ecdf = []; let perim = 0;
+      for (const s of shapes) {
+        const { shape, holes } = s.extractPoints(6);
+        for (const [pts, hole] of [[shape, false], ...holes.map((h) => [h, true])]) {
+          const ccw = THREE.ShapeUtils.area(pts) > 0, flip = hole ? !ccw : ccw;
+          for (let i = 0; i < pts.length; i++) {
+            const a = pts[i], b = pts[(i + 1) % pts.length], dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy);
+            if (len < 1e-6) continue;
+            perim += len; edges.push([a, b, flip ? [dy / len, -dx / len] : [-dy / len, dx / len]]); ecdf.push(perim);
+          }
+        }
+      }
+      const pick = (arr, x) => { let lo = 0, hi = arr.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; arr[m] < x ? (lo = m + 1) : (hi = m); } return lo; };
+      return {
+        area, perim,
+        face() {
+          const [a, b, c] = tris[pick(cdf, rand() * area)]; let u = rand(), w = rand();
+          if (u + w > 1) { u = 1 - u; w = 1 - w; }
+          return { p: [a.x + (b.x - a.x) * u + (c.x - a.x) * w, a.y + (b.y - a.y) * u + (c.y - a.y) * w, DEPTH], n: [0, 0, 1] };
+        },
+        rim() {
+          const [a, b, nn] = edges[pick(ecdf, rand() * perim)], u = rand(), z = DEPTH * (1 - rand() ** 1.8 * 0.9);
+          const nz = 0.35 + (0.5 * z) / DEPTH, l = Math.hypot(nn[0], nn[1], nz);
+          return { p: [a.x + (b.x - a.x) * u, a.y + (b.y - a.y) * u, z], n: [nn[0] / l, nn[1] / l, nz / l] };
+        },
+      };
+    }
+
+    function seeded(text) {
+      let h = 2166136261;
+      for (const ch of text) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+      let s = h >>> 0;
+      return () => { s = (s + 1831565813) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    }
+
+    /* ---------- Application State & Scene Controller ---------- */
+    const fontCache = {};
+    let activeCleanup = null;
+    let resetAnimationTime = null;
+    let updateUniformColors = null;
+    let updateAnimationParams = null;
+    let rebuildFloatingPetals = null;
+
+    let state = {
+      text: "Crafted for the roads of Sri Lanka",
+      multiLine: true,
+      fontKey: "serif",
+      animSpeed: 1.0,
+      brushStrength: 1.0,
+      windStrength: 1.0,
+      petalCount: 3,
+    };
+
+    async function loadFontBuffer(urlList) {
+      const urls = Array.isArray(urlList) ? urlList : [urlList];
+      for (const url of urls) {
+        if (fontCache[url]) return fontCache[url];
+        try {
+          const res = await fetch(url, { mode: "cors" });
+          if (res.ok) {
+            const buf = await res.arrayBuffer();
+            if (buf && buf.byteLength > 100) {
+              fontCache[url] = buf;
+              return buf;
+            }
+          }
+        } catch (e) {
+          // Try next mirror URL in fallback list
+        }
+      }
+      throw new Error("All font mirrors failed to load");
+    }
+
+    async function renderMossScene() {
+      const canvas = document.getElementById("mossCanvas");
+      const loadingOverlay = document.getElementById("loadingOverlay");
+      const statusText = document.getElementById("statusText");
+
+      loadingOverlay.style.opacity = "1";
+      loadingOverlay.style.pointerEvents = "auto";
+      statusText.textContent = "Building 3D Mesh...";
+
+      if (activeCleanup) {
+        activeCleanup();
+        activeCleanup = null;
+      }
+
+      try {
+        let buf;
+        try {
+          buf = await loadFontBuffer(FONTS[state.fontKey]);
+        } catch (err) {
+          buf = await loadFontBuffer(FONTS.sans);
+        }
+
+        const text = state.text.trim() || "Sri Lanka";
+        document.getElementById("activePhraseLabel").textContent = `"${text}"`;
+
+        const font = opentype.parse(buf);
+        const rand = seeded(text);
+        const shapes = textShapes(font, text, state.multiLine);
+        const S = makeSampler(shapes, rand);
+
+        const box = new THREE.Box2();
+        shapes.forEach((s) => s.getPoints().forEach((p) => box.expandByPoint(p)));
+        const bw = box.max.x - box.min.x, bh = box.max.y - box.min.y;
+        const delay = (x, extra = 0) => ((x - box.min.x) / bw) * 1.6 + rand() * 0.3 + extra;
+
+        const moss = { iPos: [], iDir: [], iData: [] }, flow = { iPos: [], iDir: [], iData: [] };
+        const push = (A, s, dir, data) => { A.iPos.push(...s.p); A.iDir.push(...dir); A.iData.push(...data); };
+
+        // Higher cap for long phrases so every word is lush and thick
+        const nFace = Math.min(48000, Math.round(S.area * 6800));
+        const nRim = Math.min(14000, Math.round(S.perim * 240));
+        for (let i = 0; i < nFace + nRim; i++) {
+          const f = i < nFace, s = f ? S.face() : S.rim(), r = rand();
+          push(moss, s, [s.n[0] + (rand() - 0.5) * 0.35, s.n[1] + (rand() - 0.5) * 0.35, s.n[2]],
+            [0.037 * (0.75 + 0.5 * r ** 1.5) * (f ? 1 : 0.9), rand() * 6.283, delay(s.p[0], f ? 0 : 0.08), rand()]);
+        }
+
+        const totalFlowers = Math.max(4, Math.round(S.area * 85));
+        for (let i = 0; i < totalFlowers; i++) {
+          const s = rand() < 0.15 ? S.rim() : S.face(); s.p[2] += 0.012;
+          push(flow, s, [s.n[0] + (rand() - 0.5) * 0.7, s.n[1] + (rand() - 0.5) * 0.7 + 0.2, s.n[2]],
+            [0.035 + rand() * 0.07, 0.032 + rand() * 0.024, delay(s.p[0], 0.55), rand()]);
+        }
+
+        document.getElementById("bladeCount").textContent = (nFace + nRim).toLocaleString();
+        document.getElementById("flowerCount").textContent = totalFlowers.toLocaleString();
+
+        const col = (h) => ({ value: new THREE.Color(h) });
+        const U = {
+          uTime: { value: 0 },
+          uWind: { value: state.windStrength },
+          uMouse: { value: new THREE.Vector2(999, 999) },
+          uMouseVel: { value: new THREE.Vector2(0, 0) },
+          uHover: { value: 0 },
+          uBrushStrength: { value: state.brushStrength },
+          uBrushRadius: { value: 0.55 },
+          uBase: col(C.mossBase), uMid: col(C.mossMid), uTip: col(C.mossTip),
+          uPetalIn: col(C.petalIn), uPetalEdge: col(C.petalEdge), uCenter: col(C.center), uStem: col(C.stem),
+        };
+
+        const mat = (vertexShader, fragmentShader) => new THREE.ShaderMaterial({
+          vertexShader, fragmentShader, uniforms: U, side: THREE.DoubleSide
+        });
+
+        const baseB = bladeGeometry(), baseF = flowerGeometry(), baseP = singlePetalGeometry();
+        const mossMesh = new THREE.Mesh(instanced(baseB, moss), mat(MOSS_VS, MOSS_FS));
+        const flowMesh = new THREE.Mesh(instanced(baseF, flow), mat(FLOWER_VS, FLOWER_FS));
+        const soil = new THREE.Mesh(
+          new THREE.ExtrudeGeometry(shapes, { depth: DEPTH * 0.92, bevelEnabled: false, curveSegments: 6 }),
+          new THREE.MeshBasicMaterial({ color: C.soil, transparent: true, opacity: 0 })
+        );
+        mossMesh.frustumCulled = flowMesh.frustumCulled = false;
+
+        // Floating 3D Flower Petals Group (drifting gently across the moss letters)
+        const petalMat = new THREE.ShaderMaterial({
+          vertexShader: PETAL_VS,
+          fragmentShader: PETAL_FS,
+          uniforms: U,
+          side: THREE.DoubleSide,
+          transparent: true,
+        });
+        const petalsGroup = new THREE.Group();
+        let floatingPetals = [];
+
+        const spawnPetals = (count) => {
+          while (petalsGroup.children.length) {
+            petalsGroup.remove(petalsGroup.children[0]);
+          }
+          floatingPetals = [];
+          for (let i = 0; i < count; i++) {
+            const mesh = new THREE.Mesh(baseP, petalMat);
+            const scale = 0.09 + Math.random() * 0.055;
+            mesh.scale.setScalar(scale);
+
+            // Start each petal at a staggered point across the text bounds
+            const pData = {
+              mesh,
+              x: box.min.x + Math.random() * bw,
+              y: box.min.y + Math.random() * bh,
+              z: DEPTH + 0.14 + Math.random() * 0.25,
+              vx: 0.16 + Math.random() * 0.18,
+              vy: -0.05 - Math.random() * 0.08,
+              phase: Math.random() * Math.PI * 2,
+              rotSpeedX: (Math.random() - 0.5) * 1.8,
+              rotSpeedY: (Math.random() - 0.5) * 2.2,
+              rotSpeedZ: (Math.random() - 0.5) * 1.5,
+              flutterFreq: 1.4 + Math.random() * 1.4,
+            };
+            mesh.position.set(pData.x, pData.y, pData.z);
+            mesh.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
+            petalsGroup.add(mesh);
+            floatingPetals.push(pData);
+          }
+          document.getElementById("petalCountLabel").textContent = count;
+        };
+        spawnPetals(state.petalCount);
+        rebuildFloatingPetals = spawnPetals;
+
+        const group = new THREE.Group();
+        group.add(soil, mossMesh, flowMesh, petalsGroup);
+        const offsetX = -(box.min.x + box.max.x) / 2;
+        const offsetY = -(box.min.y + box.max.y) / 2;
+        group.position.set(offsetX, offsetY, 0);
+
+        const scene = new THREE.Scene();
+        scene.add(group);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 150);
+
+        const fit = () => {
+          const w = canvas.clientWidth, h = canvas.clientHeight;
+          if (!w || !h) return;
+          renderer.setSize(w, h, false);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+          const padH = state.multiLine ? 1.28 : 1.45;
+          const padW = state.multiLine ? 1.12 : 1.08;
+          camera.position.z = Math.max((bh * padH) / 2 / t, (bw * padW) / 2 / (t * camera.aspect));
+        };
+        fit();
+        const ro = new ResizeObserver(fit);
+        ro.observe(canvas);
+
+        // Raycast mouse position onto the 3D text plane so only nearby moss & flowers bend
+        const raycaster = new THREE.Raycaster();
+        const ndc = new THREE.Vector2();
+        const hitPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -DEPTH);
+        const hitPoint = new THREE.Vector3();
+        const targetMouse = new THREE.Vector2(999, 999);
+        const prevMouse = new THREE.Vector2(999, 999);
+        let targetHover = 0;
+
+        const onPointerMove = (e) => {
+          const rect = canvas.getBoundingClientRect();
+          ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+          raycaster.setFromCamera(ndc, camera);
+          if (raycaster.ray.intersectPlane(hitPlane, hitPoint)) {
+            const lx = hitPoint.x - offsetX;
+            const ly = hitPoint.y - offsetY;
+            if (targetHover < 0.05) {
+              U.uMouse.value.set(lx, ly);
+              prevMouse.set(lx, ly);
+            }
+            targetMouse.set(lx, ly);
+            targetHover = 1.0;
+          }
+        };
+        const onPointerLeave = () => {
+          targetHover = 0.0;
+        };
+        canvas.addEventListener("pointermove", onPointerMove);
+        canvas.addEventListener("pointerleave", onPointerLeave);
+
+        let t0 = performance.now();
+        resetAnimationTime = () => { t0 = performance.now(); };
+
+        updateUniformColors = (newColors) => {
+          U.uBase.value.set(newColors.mossBase);
+          U.uMid.value.set(newColors.mossMid);
+          U.uTip.value.set(newColors.mossTip);
+          U.uPetalIn.value.set(newColors.petalIn);
+          U.uPetalEdge.value.set(newColors.petalEdge);
+          U.uCenter.value.set(newColors.center);
+          U.uStem.value.set(newColors.stem);
+          soil.material.color.set(newColors.soil);
+        };
+
+        updateAnimationParams = () => {
+          U.uBrushStrength.value = state.brushStrength;
+          U.uWind.value = state.windStrength;
+        };
+
+        let animId = null;
+        let lastFrameTime = performance.now();
+        let elapsedAnimTime = 0;
+        resetAnimationTime = () => { elapsedAnimTime = 0; };
+
+        const animate = () => {
+          animId = requestAnimationFrame(animate);
+          const now = performance.now();
+          const rawDt = Math.min(0.05, (now - lastFrameTime) / 1000);
+          lastFrameTime = now;
+
+          const dt = rawDt * state.animSpeed;
+          elapsedAnimTime += dt;
+          const t = elapsedAnimTime;
+
+          U.uTime.value = t;
+          soil.material.opacity = Math.min(1, t / 0.6);
+
+          // Smoothly interpolate cursor position, velocity, and hover strength
+          U.uMouse.value.lerp(targetMouse, 0.22);
+          const vx = (U.uMouse.value.x - prevMouse.x) * 14.0;
+          const vy = (U.uMouse.value.y - prevMouse.y) * 14.0;
+          U.uMouseVel.value.x += (vx - U.uMouseVel.value.x) * 0.25;
+          U.uMouseVel.value.y += (vy - U.uMouseVel.value.y) * 0.25;
+          U.uMouseVel.value.clampLength(0, 2.5);
+          prevMouse.copy(U.uMouse.value);
+
+          U.uHover.value += (targetHover - U.uHover.value) * 0.12;
+
+          // Update gently floating flower petals (drifting with wind & reacting to cursor breeze)
+          const windFactor = Math.max(0.25, state.windStrength);
+          const padX = bw * 0.18 + 0.6;
+          const padY = bh * 0.35 + 0.5;
+
+          for (let i = 0; i < floatingPetals.length; i++) {
+            const p = floatingPetals[i];
+            const swayX = Math.sin(t * p.flutterFreq + p.phase) * 0.22 * windFactor;
+            const swayY = Math.cos(t * (p.flutterFreq * 0.8) + p.phase) * 0.16 * windFactor;
+            const swayZ = Math.sin(t * 1.1 + p.phase) * 0.08;
+
+            p.x += (p.vx * windFactor + swayX) * dt;
+            p.y += (p.vy * windFactor + swayY) * dt;
+
+            // Subtle push when cursor passes near a floating petal
+            if (U.uHover.value > 0.01 && state.brushStrength > 0) {
+              const dx = p.x - U.uMouse.value.x;
+              const dy = p.y - U.uMouse.value.y;
+              const dist = Math.hypot(dx, dy);
+              if (dist < 0.85 && dist > 0.001) {
+                const push = (1 - dist / 0.85) * 1.6 * state.brushStrength * U.uHover.value * dt;
+                p.x += (dx / dist) * push + U.uMouseVel.value.x * 0.15 * dt;
+                p.y += (dy / dist) * push + U.uMouseVel.value.y * 0.15 * dt;
+              }
+            }
+
+            // Wrap seamlessly around the text bounds so petals float continuously
+            if (p.x > box.max.x + padX) {
+              p.x = box.min.x - padX * 0.6;
+              p.y = box.min.y + Math.random() * bh;
+            }
+            if (p.y < box.min.y - padY) {
+              p.y = box.max.y + padY * 0.6;
+              p.x = box.min.x + Math.random() * bw;
+            } else if (p.y > box.max.y + padY) {
+              p.y = box.min.y - padY * 0.4;
+            }
+
+            p.mesh.position.set(p.x, p.y, p.z + swayZ);
+            p.mesh.rotation.x += p.rotSpeedX * dt * windFactor;
+            p.mesh.rotation.y += p.rotSpeedY * dt * windFactor;
+            p.mesh.rotation.z += (p.rotSpeedZ + Math.cos(t * p.flutterFreq + p.phase) * 0.9) * dt;
+          }
+
+          renderer.render(scene, camera);
+        };
+        animate();
+
+        loadingOverlay.style.opacity = "0";
+        loadingOverlay.style.pointerEvents = "none";
+        statusText.textContent = "Live WebGL Active";
+
+        activeCleanup = () => {
+          if (animId) cancelAnimationFrame(animId);
+          ro.disconnect();
+          canvas.removeEventListener("pointermove", onPointerMove);
+          canvas.removeEventListener("pointerleave", onPointerLeave);
+          [mossMesh, flowMesh, soil].forEach((m) => { m.geometry.dispose(); m.material.dispose(); });
+          petalMat.dispose();
+          baseB.dispose(); baseF.dispose(); baseP.dispose(); renderer.dispose();
+        };
+
+      } catch (err) {
+        console.error(err);
+        statusText.textContent = "Error loading font";
+      }
+    }
+
+    /* ---------- UI Event Bindings ---------- */
+    window.addEventListener("DOMContentLoaded", () => {
+      renderMossScene();
+
+      // Replay Grow Button
+      document.getElementById("replayBtn").addEventListener("click", () => {
+        if (resetAnimationTime) resetAnimationTime();
+      });
+
+      // Custom Text Input
+      const textInput = document.getElementById("textInput");
+      const triggerTextUpdate = () => {
+        state.text = textInput.value || "Crafted for the roads of Sri Lanka";
+        renderMossScene();
+      };
+      document.getElementById("applyTextBtn").addEventListener("click", triggerTextUpdate);
+      textInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") triggerTextUpdate();
+      });
+
+      // Multi-line vs Single-line toggle
+      const multiBtn = document.getElementById("layoutMultiBtn");
+      const singleBtn = document.getElementById("layoutSingleBtn");
+
+      multiBtn.addEventListener("click", () => {
+        if (state.multiLine) return;
+        state.multiLine = true;
+        multiBtn.className = "py-1.5 px-2.5 rounded-lg text-xs font-medium bg-[#7a9a12] text-white shadow transition-all cursor-pointer";
+        singleBtn.className = "py-1.5 px-2.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-all cursor-pointer";
+        renderMossScene();
+      });
+
+      singleBtn.addEventListener("click", () => {
+        if (!state.multiLine) return;
+        state.multiLine = false;
+        singleBtn.className = "py-1.5 px-2.5 rounded-lg text-xs font-medium bg-[#7a9a12] text-white shadow transition-all cursor-pointer";
+        multiBtn.className = "py-1.5 px-2.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-white transition-all cursor-pointer";
+        renderMossScene();
+      });
+
+      // Font Selector
+      document.getElementById("fontSelect").addEventListener("change", (e) => {
+        state.fontKey = e.target.value;
+        renderMossScene();
+      });
+
+      // Sliders for Animation Speed, Cursor Brush Intensity, Wind Sway, and Floating Petals
+      const speedSlider = document.getElementById("animSpeedSlider");
+      const speedLabel = document.getElementById("speedValLabel");
+      speedSlider.addEventListener("input", (e) => {
+        state.animSpeed = parseFloat(e.target.value);
+        speedLabel.textContent = `${state.animSpeed.toFixed(1)}x`;
+      });
+
+      const brushSlider = document.getElementById("brushStrengthSlider");
+      const brushLabel = document.getElementById("brushValLabel");
+      brushSlider.addEventListener("input", (e) => {
+        state.brushStrength = parseFloat(e.target.value);
+        brushLabel.textContent = `${state.brushStrength.toFixed(1)}x`;
+        if (updateAnimationParams) updateAnimationParams();
+      });
+
+      const windSlider = document.getElementById("windStrengthSlider");
+      const windLabel = document.getElementById("windValLabel");
+      windSlider.addEventListener("input", (e) => {
+        state.windStrength = parseFloat(e.target.value);
+        windLabel.textContent = `${state.windStrength.toFixed(1)}x`;
+        if (updateAnimationParams) updateAnimationParams();
+      });
+
+      const petalSlider = document.getElementById("petalCountSlider");
+      const petalLabel = document.getElementById("petalsValLabel");
+      petalSlider.addEventListener("input", (e) => {
+        state.petalCount = parseInt(e.target.value, 10);
+        petalLabel.textContent = `${state.petalCount} ${state.petalCount === 1 ? "Petal" : "Petals"}`;
+        if (rebuildFloatingPetals) rebuildFloatingPetals(state.petalCount);
+      });
+
+      // Flora Palette Presets
+      document.querySelectorAll(".theme-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const themeKey = btn.getAttribute("data-theme");
+          currentTheme = themeKey;
+          C = { ...THEMES[themeKey] };
+          if (updateUniformColors) updateUniformColors(C);
+          if (resetAnimationTime) resetAnimationTime();
+
+          document.querySelectorAll(".theme-btn").forEach((b) => {
+            b.classList.remove("border-[#c9e04a]", "bg-[#2f3d08]/60", "text-[#e2f59e]");
+            b.classList.add("border-zinc-700/70", "bg-black/40", "text-zinc-300");
+          });
+          btn.classList.remove("border-zinc-700/70", "bg-black/40", "text-zinc-300");
+          btn.classList.add("border-[#c9e04a]", "bg-[#2f3d08]/60", "text-[#e2f59e]");
+        });
+      });
+
+      // Function to generate the complete Next.js component with all current slider values baked in
+      function generateFullNextJsComponentCode() {
+        const primaryFontUrl = FONTS[state.fontKey][0];
+        return `"use client";
+// npm i three opentype.js
+import { useEffect, useRef } from "react";
+import * as THREE from "three";
+import { parse } from "opentype.js";
+
+const DEFAULT_COLORS = ${JSON.stringify(C, null, 2)};
+const DEPTH = 0.06;
+const GROW = 1.1;
+
+const COMMON = /* glsl */ \`
+uniform float uTime; uniform float uWind;
+uniform vec2 uMouse; uniform vec2 uMouseVel; uniform float uHover;
+uniform float uBrushStrength; uniform float uBrushRadius;
+float ease(float a){ float b=a-1.0; return 1.0+2.70158*b*b*b+1.70158*b*b; }
+mat3 basis(vec3 n){
+  vec3 up = abs(n.y)<0.98 ? vec3(0.,1.,0.) : vec3(1.,0.,0.);
+  vec3 t = normalize(cross(up,n));
+  return mat3(t, n, cross(n,t));
+}
+vec3 sway(vec3 p, float s){
+  return vec3(sin(uTime*1.1+p.x*2.0+s*30.0), cos(uTime*0.8+p.y*2.0+s*20.0)*0.6, 0.0)*uWind;
+}
+vec3 interact(vec3 p, float weight){
+  vec2 d = p.xy - uMouse;
+  float dist = length(d);
+  float f = smoothstep(uBrushRadius, 0.0, dist) * uHover * uBrushStrength;
+  vec2 pushDir = dist > 0.0001 ? normalize(d) : vec2(0.0, 1.0);
+  vec2 disp = (pushDir * 0.14 + uMouseVel * 0.09) * f * weight;
+  return vec3(disp, -0.05 * f * weight);
+}\`;
+
+const MOSS_VS = /* glsl */ \`\${COMMON}
+attribute float aH; attribute vec3 iPos; attribute vec3 iDir; attribute vec4 iData;
+varying float vH; varying float vJ;
+void main(){
+  float g = ease(clamp((uTime-iData.z)/\${GROW.toFixed(2)}, 0.0, 1.0));
+  float c=cos(iData.y), s=sin(iData.y);
+  vec3 p = position;
+  p.xz = mat2(c,-s,s,c)*p.xz;
+  p *= iData.x*g; p.y *= 1.35;
+  vec3 local = iPos + basis(normalize(iDir))*p;
+  local += sway(iPos, iData.w)*aH*aH*iData.x*0.45*g;
+  local += interact(iPos, aH * g);
+  gl_Position = projectionMatrix*modelViewMatrix*vec4(local,1.0);
+  vH=aH; vJ=fract(iData.w*13.37);
+}\`;
+
+const MOSS_FS = /* glsl */ \`
+uniform vec3 uBase; uniform vec3 uMid; uniform vec3 uTip;
+varying float vH; varying float vJ;
+void main(){
+  vec3 c = mix(uBase,uMid,smoothstep(0.0,0.6,vH));
+  c = mix(c,uTip,smoothstep(0.5,1.0,vH)*(0.55+0.45*vJ));
+  c *= (0.82+0.36*vJ)*mix(0.42,1.0,smoothstep(0.0,0.8,vH))*1.15;
+  gl_FragColor = vec4(c,1.0);
+  #include <colorspace_fragment>
+}\`;
+
+const FLOWER_VS = /* glsl */ \`\${COMMON}
+attribute float aKind; attribute float aR; attribute vec3 iPos; attribute vec3 iDir; attribute vec4 iData;
+varying float vKind; varying float vR;
+void main(){
+  float g = ease(clamp((uTime-iData.z)/\${GROW.toFixed(2)}, 0.0, 1.0));
+  vec3 n = normalize(iDir);
+  float len = iData.x*g;
+  vec3 sw = sway(iPos, iData.w)*len*0.35 + interact(iPos, 1.15 * g);
+  vec3 local;
+  if (aKind < 0.5) {
+    float h = position.y;
+    local = iPos + n*len*h + sw*h*h + basis(n)[0]*position.x*0.006*(1.0-0.3*h);
+  } else {
+    float gh = ease(clamp((uTime-iData.z-0.25)/0.9, 0.0, 1.0));
+    mat3 B = basis(normalize(n+vec3(0.0,0.0,0.6)+sw*3.0));
+    local = iPos + n*len + sw + B*(position*iData.y*gh);
+  }
+  gl_Position = projectionMatrix*modelViewMatrix*vec4(local,1.0);
+  vKind=aKind; vR=aR;
+}\`;
+
+const FLOWER_FS = /* glsl */ \`
+uniform vec3 uPetalIn; uniform vec3 uPetalEdge; uniform vec3 uCenter; uniform vec3 uStem;
+varying float vKind; varying float vR;
+void main(){
+  vec3 c = vKind<0.5 ? uStem : (vKind<1.5 ? mix(uPetalIn,uPetalEdge,smoothstep(0.15,1.0,vR)) : uCenter);
+  gl_FragColor = vec4(c,1.0);
+  #include <colorspace_fragment>
+}\`;
+
+const PETAL_VS = /* glsl */ \`
+attribute float aR; varying float vR;
+void main(){ vR = aR; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }\`;
+
+const PETAL_FS = /* glsl */ \`
+uniform vec3 uPetalIn; uniform vec3 uPetalEdge; varying float vR;
+void main(){
+  vec3 c = mix(uPetalIn, uPetalEdge, smoothstep(0.1, 0.95, vR));
+  gl_FragColor = vec4(c, 0.96);
+  #include <colorspace_fragment>
+}\`;
+
+function singlePetalGeometry() {
+  const pos = [], rad = [], idx = [];
+  const v = (x, y, z, r) => { pos.push(x, y, z); rad.push(r); return pos.length / 3 - 1; };
+  const ctr = v(0, 0, 0, 0);
+  for (let i = 0; i <= 12; i++) {
+    const u = i / 12, a = (u - 0.5) * 1.35, r = Math.sin(u * Math.PI) ** 0.45;
+    v(Math.cos(a) * r, Math.sin(r * Math.PI) * 0.16 - r * r * 0.08, Math.sin(a) * r * 0.78, r);
+  }
+  for (let i = 0; i < 12; i++) idx.push(ctr, ctr + i + 2, ctr + i + 1);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("aR", new THREE.Float32BufferAttribute(rad, 1));
+  g.setIndex(idx);
+  return g;
+}
+
+function bladeGeometry() {
+  const pos = [], aH = [], idx = [], N = 7, SEG = 4;
+  for (let b = 0; b < N; b++) {
+    const a = (b / N) * Math.PI * 2, lean = b === 0 ? 0.1 : 0.6 + (b % 3) * 0.25;
+    const len = b === 0 ? 0.85 : 0.6 + (b % 4) * 0.1;
+    const dx = Math.cos(a), dz = Math.sin(a), px = -dz, pz = dx, base = pos.length / 3;
+    for (let i = 0; i <= SEG; i++) {
+      const t = i / SEG, out = Math.sin(lean * (0.4 + 0.9 * t)) * len * t;
+      const y = Math.cos(lean * 0.6 * t) * len * t, w = (0.15 * (1 - t * 0.85)) / 2;
+      pos.push(dx * out - px * w, y, dz * out - pz * w, dx * out + px * w, y, dz * out + pz * w);
+      aH.push(t, t);
+    }
+    for (let i = 0; i < SEG; i++) { const k = base + i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("aH", new THREE.Float32BufferAttribute(aH, 1));
+  g.setIndex(idx);
+  return g;
+}
+
+function flowerGeometry() {
+  const pos = [], kind = [], rad = [], idx = [];
+  const v = (x, y, z, k, r) => { pos.push(x, y, z); kind.push(k); rad.push(r); return pos.length / 3 - 1; };
+  for (let i = 0; i <= 6; i++) { const t = i / 6; v(-1, t, 0, 0, t); v(1, t, 0, 0, t); }
+  for (let i = 0; i < 6; i++) { const k = i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+  for (let p = 0; p < 5; p++) {
+    const ctr = v(0, 0, 0, 1, 0), a0 = (p / 5) * Math.PI * 2;
+    for (let i = 0; i <= 8; i++) {
+      const u = i / 8, a = a0 + (u - 0.5) * 1.2, r = Math.sin(u * Math.PI) ** 0.45;
+      v(Math.cos(a) * r, r * r * 0.1, Math.sin(a) * r, 1, r);
+    }
+    for (let i = 0; i < 8; i++) idx.push(ctr, ctr + i + 2, ctr + i + 1);
+  }
+  const mid = v(0, 0.08, 0, 2, 0);
+  for (let i = 0; i <= 10; i++) { const a = (i / 10) * Math.PI * 2; v(Math.cos(a) * 0.22, 0.05, Math.sin(a) * 0.22, 2, 0.1); }
+  for (let i = 0; i < 10; i++) idx.push(mid, mid + i + 2, mid + i + 1);
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute("aKind", new THREE.Float32BufferAttribute(kind, 1));
+  g.setAttribute("aR", new THREE.Float32BufferAttribute(rad, 1));
+  g.setIndex(idx);
+  return g;
+}
+
+function instanced(base, A) {
+  const g = new THREE.InstancedBufferGeometry();
+  g.index = base.index;
+  for (const k in base.attributes) g.setAttribute(k, base.attributes[k]);
+  g.setAttribute("iPos", new THREE.InstancedBufferAttribute(new Float32Array(A.iPos), 3));
+  g.setAttribute("iDir", new THREE.InstancedBufferAttribute(new Float32Array(A.iDir), 3));
+  g.setAttribute("iData", new THREE.InstancedBufferAttribute(new Float32Array(A.iData), 4));
+  g.instanceCount = A.iPos.length / 3;
+  return g;
+}
+
+function splitIntoBalancedLines(text, multiLine) {
+  const clean = text.trim().replace(/\\s+/g, " ");
+  if (!multiLine) return [clean];
+  const words = clean.split(" ");
+  if (words.length <= 2) return [clean];
+  const totalChars = clean.length;
+  let bestIdx = 1, bestDiff = Infinity, acc = 0;
+  for (let i = 0; i < words.length - 1; i++) {
+    acc += words[i].length + (i > 0 ? 1 : 0);
+    const diff = Math.abs(totalChars / 2 - acc);
+    if (diff < bestDiff) { bestDiff = diff; bestIdx = i + 1; }
+  }
+  return [words.slice(0, bestIdx).join(" "), words.slice(bestIdx).join(" ")];
+}
+
+function textShapes(font, text, multiLine = true) {
+  const lines = splitIntoBalancedLines(text, multiLine);
+  const sp = new THREE.ShapePath();
+  const lineHeight = 1.18;
+  lines.forEach((lineText, idx) => {
+    const offsetX = -font.getAdvanceWidth(lineText, 1) / 2;
+    const offsetY = idx * lineHeight;
+    for (const c of font.getPath(lineText, offsetX, offsetY, 1).commands) {
+      if (c.type === "M") sp.moveTo(c.x, -c.y);
+      else if (c.type === "L") sp.lineTo(c.x, -c.y);
+      else if (c.type === "Q") sp.quadraticCurveTo(c.x1, -c.y1, c.x, -c.y);
+      else if (c.type === "C") sp.bezierCurveTo(c.x1, -c.y1, c.x2, -c.y2, c.x, -c.y);
+      else if (c.type === "Z" && sp.currentPath?.curves.length) sp.currentPath.closePath();
+    }
+  });
+  return sp.toShapes();
+}
+
+function makeSampler(shapes, rand) {
+  const geo = new THREE.ShapeGeometry(shapes, 6), P = geo.attributes.position, I = geo.index;
+  const tris = [], cdf = []; let area = 0;
+  const vec = (i) => new THREE.Vector2().fromBufferAttribute(P, I.getX(i));
+  for (let i = 0; i < I.count; i += 3) {
+    const a = vec(i), b = vec(i + 1), c = vec(i + 2);
+    const ar = Math.abs((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) / 2;
+    if (ar > 0) { area += ar; tris.push([a, b, c]); cdf.push(area); }
+  }
+  geo.dispose();
+  const edges = [], ecdf = []; let perim = 0;
+  for (const s of shapes) {
+    const { shape, holes } = s.extractPoints(6);
+    for (const [pts, hole] of [[shape, false], ...holes.map((h) => [h, true])]) {
+      const ccw = THREE.ShapeUtils.area(pts) > 0, flip = hole ? !ccw : ccw;
+      for (let i = 0; i < pts.length; i++) {
+        const a = pts[i], b = pts[(i + 1) % pts.length], dx = b.x - a.x, dy = b.y - a.y, len = Math.hypot(dx, dy);
+        if (len < 1e-6) continue;
+        perim += len; edges.push([a, b, flip ? [dy / len, -dx / len] : [-dy / len, dx / len]]); ecdf.push(perim);
+      }
+    }
+  }
+  const pick = (arr, x) => { let lo = 0, hi = arr.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; arr[m] < x ? (lo = m + 1) : (hi = m); } return lo; };
+  return {
+    area, perim,
+    face() {
+      const [a, b, c] = tris[pick(cdf, rand() * area)]; let u = rand(), w = rand();
+      if (u + w > 1) { u = 1 - u; w = 1 - w; }
+      return { p: [a.x + (b.x - a.x) * u + (c.x - a.x) * w, a.y + (b.y - a.y) * u + (c.y - a.y) * w, DEPTH], n: [0, 0, 1] };
+    },
+    rim() {
+      const [a, b, nn] = edges[pick(ecdf, rand() * perim)], u = rand(), z = DEPTH * (1 - rand() ** 1.8 * 0.9);
+      const nz = 0.35 + (0.5 * z) / DEPTH, l = Math.hypot(nn[0], nn[1], nz);
+      return { p: [a.x + (b.x - a.x) * u, a.y + (b.y - a.y) * u, z], n: [nn[0] / l, nn[1] / l, nz / l] };
+    },
+  };
+}
+
+function seeded(text) {
+  let h = 2166136261;
+  for (const ch of text) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+  let s = h >>> 0;
+  return () => { s = (s + 1831565813) >>> 0; let t = s; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+
+export default function MossText({
+  text = "${state.text}",
+  fontUrl = "${primaryFontUrl}",
+  height = 420,
+  multiLine = ${state.multiLine},
+  animSpeed = ${state.animSpeed},
+  brushStrength = ${state.brushStrength},
+  windStrength = ${state.windStrength},
+  petalCount = ${state.petalCount},
+  colors = DEFAULT_COLORS,
+  className = "",
+}) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const canvas = ref.current;
+    let alive = true, cleanup = () => {};
+
+    fetch(fontUrl).then((r) => r.arrayBuffer()).then((buf) => {
+      if (!alive || !text.trim()) return;
+      const C = { ...DEFAULT_COLORS, ...colors };
+      const font = parse(buf), rand = seeded(text), shapes = textShapes(font, text, multiLine);
+      const S = makeSampler(shapes, rand);
+      const box = new THREE.Box2();
+      shapes.forEach((s) => s.getPoints().forEach((p) => box.expandByPoint(p)));
+      const bw = box.max.x - box.min.x, bh = box.max.y - box.min.y;
+      const delay = (x, extra = 0) => ((x - box.min.x) / bw) * 1.6 + rand() * 0.3 + extra;
+
+      const moss = { iPos: [], iDir: [], iData: [] }, flow = { iPos: [], iDir: [], iData: [] };
+      const push = (A, s, dir, data) => { A.iPos.push(...s.p); A.iDir.push(...dir); A.iData.push(...data); };
+      const nFace = Math.min(48000, Math.round(S.area * 6800)), nRim = Math.min(14000, Math.round(S.perim * 240));
+      for (let i = 0; i < nFace + nRim; i++) {
+        const f = i < nFace, s = f ? S.face() : S.rim(), r = rand();
+        push(moss, s, [s.n[0] + (rand() - 0.5) * 0.35, s.n[1] + (rand() - 0.5) * 0.35, s.n[2]],
+          [0.037 * (0.75 + 0.5 * r ** 1.5) * (f ? 1 : 0.9), rand() * 6.283, delay(s.p[0], f ? 0 : 0.08), rand()]);
+      }
+      for (let i = 0, n = Math.max(4, Math.round(S.area * 85)); i < n; i++) {
+        const s = rand() < 0.15 ? S.rim() : S.face(); s.p[2] += 0.012;
+        push(flow, s, [s.n[0] + (rand() - 0.5) * 0.7, s.n[1] + (rand() - 0.5) * 0.7 + 0.2, s.n[2]],
+          [0.035 + rand() * 0.07, 0.032 + rand() * 0.024, delay(s.p[0], 0.55), rand()]);
+      }
+
+      const col = (h) => ({ value: new THREE.Color(h) });
+      const U = {
+        uTime: { value: 0 },
+        uWind: { value: windStrength },
+        uMouse: { value: new THREE.Vector2(999, 999) },
+        uMouseVel: { value: new THREE.Vector2(0, 0) },
+        uHover: { value: 0 },
+        uBrushStrength: { value: brushStrength },
+        uBrushRadius: { value: 0.55 },
+        uBase: col(C.mossBase), uMid: col(C.mossMid), uTip: col(C.mossTip),
+        uPetalIn: col(C.petalIn), uPetalEdge: col(C.petalEdge), uCenter: col(C.center), uStem: col(C.stem),
+      };
+
+      const mat = (vertexShader, fragmentShader) => new THREE.ShaderMaterial({ vertexShader, fragmentShader, uniforms: U, side: THREE.DoubleSide });
+      const baseB = bladeGeometry(), baseF = flowerGeometry(), baseP = singlePetalGeometry();
+      const mossMesh = new THREE.Mesh(instanced(baseB, moss), mat(MOSS_VS, MOSS_FS));
+      const flowMesh = new THREE.Mesh(instanced(baseF, flow), mat(FLOWER_VS, FLOWER_FS));
+      const soil = new THREE.Mesh(
+        new THREE.ExtrudeGeometry(shapes, { depth: DEPTH * 0.92, bevelEnabled: false, curveSegments: 6 }),
+        new THREE.MeshBasicMaterial({ color: C.soil, transparent: true, opacity: 0 })
+      );
+      mossMesh.frustumCulled = flowMesh.frustumCulled = false;
+
+      // Floating 3D Flower Petals
+      const petalMat = new THREE.ShaderMaterial({ vertexShader: PETAL_VS, fragmentShader: PETAL_FS, uniforms: U, side: THREE.DoubleSide, transparent: true });
+      const petalsGroup = new THREE.Group();
+      const floatingPetals = [];
+      for (let i = 0; i < petalCount; i++) {
+        const mesh = new THREE.Mesh(baseP, petalMat);
+        mesh.scale.setScalar(0.09 + Math.random() * 0.055);
+        const pData = {
+          mesh,
+          x: box.min.x + Math.random() * bw,
+          y: box.min.y + Math.random() * bh,
+          z: DEPTH + 0.14 + Math.random() * 0.25,
+          vx: 0.16 + Math.random() * 0.18,
+          vy: -0.05 - Math.random() * 0.08,
+          phase: Math.random() * Math.PI * 2,
+          rotSpeedX: (Math.random() - 0.5) * 1.8,
+          rotSpeedY: (Math.random() - 0.5) * 2.2,
+          rotSpeedZ: (Math.random() - 0.5) * 1.5,
+          flutterFreq: 1.4 + Math.random() * 1.4,
+        };
+        mesh.position.set(pData.x, pData.y, pData.z);
+        mesh.rotation.set(Math.random() * 6, Math.random() * 6, Math.random() * 6);
+        petalsGroup.add(mesh);
+        floatingPetals.push(pData);
+      }
+
+      const group = new THREE.Group();
+      group.add(soil, mossMesh, flowMesh, petalsGroup);
+      const offsetX = -(box.min.x + box.max.x) / 2, offsetY = -(box.min.y + box.max.y) / 2;
+      group.position.set(offsetX, offsetY, 0);
+      const scene = new THREE.Scene(); scene.add(group);
+
+      const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 150);
+      const fit = () => {
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        if (!w || !h) return;
+        renderer.setSize(w, h, false);
+        camera.aspect = w / h; camera.updateProjectionMatrix();
+        const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+        const padH = multiLine ? 1.28 : 1.45, padW = multiLine ? 1.12 : 1.08;
+        camera.position.z = Math.max((bh * padH) / 2 / t, (bw * padW) / 2 / (t * camera.aspect));
+      };
+      fit();
+      const ro = new ResizeObserver(fit); ro.observe(canvas);
+
+      // Cursor raycasting onto text surface
+      const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
+      const hitPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), -DEPTH), hitPoint = new THREE.Vector3();
+      const targetMouse = new THREE.Vector2(999, 999), prevMouse = new THREE.Vector2(999, 999);
+      let targetHover = 0;
+
+      const onPointerMove = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(ndc, camera);
+        if (raycaster.ray.intersectPlane(hitPlane, hitPoint)) {
+          const lx = hitPoint.x - offsetX, ly = hitPoint.y - offsetY;
+          if (targetHover < 0.05) { U.uMouse.value.set(lx, ly); prevMouse.set(lx, ly); }
+          targetMouse.set(lx, ly); targetHover = 1.0;
+        }
+      };
+      const onPointerLeave = () => { targetHover = 0.0; };
+      canvas.addEventListener("pointermove", onPointerMove);
+      canvas.addEventListener("pointerleave", onPointerLeave);
+
+      let lastFrameTime = performance.now(), elapsedAnimTime = 0;
+      renderer.setAnimationLoop(() => {
+        const now = performance.now();
+        const rawDt = Math.min(0.05, (now - lastFrameTime) / 1000);
+        lastFrameTime = now;
+        const dt = rawDt * animSpeed;
+        elapsedAnimTime += dt;
+        const t = elapsedAnimTime;
+
+        U.uTime.value = t;
+        soil.material.opacity = Math.min(1, t / 0.6);
+
+        U.uMouse.value.lerp(targetMouse, 0.22);
+        const vx = (U.uMouse.value.x - prevMouse.x) * 14.0, vy = (U.uMouse.value.y - prevMouse.y) * 14.0;
+        U.uMouseVel.value.x += (vx - U.uMouseVel.value.x) * 0.25;
+        U.uMouseVel.value.y += (vy - U.uMouseVel.value.y) * 0.25;
+        U.uMouseVel.value.clampLength(0, 2.5);
+        prevMouse.copy(U.uMouse.value);
+        U.uHover.value += (targetHover - U.uHover.value) * 0.12;
+
+        const windFactor = Math.max(0.25, windStrength);
+        const padX = bw * 0.18 + 0.6, padY = bh * 0.35 + 0.5;
+        for (let i = 0; i < floatingPetals.length; i++) {
+          const p = floatingPetals[i];
+          const swayX = Math.sin(t * p.flutterFreq + p.phase) * 0.22 * windFactor;
+          const swayY = Math.cos(t * (p.flutterFreq * 0.8) + p.phase) * 0.16 * windFactor;
+          const swayZ = Math.sin(t * 1.1 + p.phase) * 0.08;
+          p.x += (p.vx * windFactor + swayX) * dt;
+          p.y += (p.vy * windFactor + swayY) * dt;
+
+          if (U.uHover.value > 0.01 && brushStrength > 0) {
+            const dx = p.x - U.uMouse.value.x, dy = p.y - U.uMouse.value.y, dist = Math.hypot(dx, dy);
+            if (dist < 0.85 && dist > 0.001) {
+              const push = (1 - dist / 0.85) * 1.6 * brushStrength * U.uHover.value * dt;
+              p.x += (dx / dist) * push + U.uMouseVel.value.x * 0.15 * dt;
+              p.y += (dy / dist) * push + U.uMouseVel.value.y * 0.15 * dt;
+            }
+          }
+          if (p.x > box.max.x + padX) { p.x = box.min.x - padX * 0.6; p.y = box.min.y + Math.random() * bh; }
+          if (p.y < box.min.y - padY) { p.y = box.max.y + padY * 0.6; p.x = box.min.x + Math.random() * bw; }
+          else if (p.y > box.max.y + padY) { p.y = box.min.y - padY * 0.4; }
+
+          p.mesh.position.set(p.x, p.y, p.z + swayZ);
+          p.mesh.rotation.x += p.rotSpeedX * dt * windFactor;
+          p.mesh.rotation.y += p.rotSpeedY * dt * windFactor;
+          p.mesh.rotation.z += (p.rotSpeedZ + Math.cos(t * p.flutterFreq + p.phase) * 0.9) * dt;
+        }
+
+        renderer.render(scene, camera);
+      });
+
+      cleanup = () => {
+        renderer.setAnimationLoop(null); ro.disconnect();
+        canvas.removeEventListener("pointermove", onPointerMove);
+        canvas.removeEventListener("pointerleave", onPointerLeave);
+        [mossMesh, flowMesh, soil].forEach((m) => { m.geometry.dispose(); m.material.dispose(); });
+        petalMat.dispose(); baseB.dispose(); baseF.dispose(); baseP.dispose(); renderer.dispose();
+      };
+    });
+
+    return () => { alive = false; cleanup(); };
+  }, [text, fontUrl, multiLine, animSpeed, brushStrength, windStrength, petalCount, colors]);
+
+  return <canvas ref={ref} role="img" aria-label={text} className={className} style={{ width: "100%", height, display: "block" }} />;
+}`;
+      }
+
+      function copyToClipboardAndToast(codeStr) {
+        const tempInput = document.createElement("textarea");
+        tempInput.value = codeStr;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+
+        const toast = document.getElementById("toast");
+        toast.classList.remove("opacity-0", "translate-y-3");
+        setTimeout(() => {
+          toast.classList.add("opacity-0", "translate-y-3");
+        }, 2800);
+      }
+
+      const codeModal = document.getElementById("codeModal");
+      const exportedCodeBlock = document.getElementById("exportedCodeBlock");
+
+      // Open Modal & Copy Full Next.js Component Code
+      document.getElementById("copyCodeBtn").addEventListener("click", () => {
+        const fullCode = generateFullNextJsComponentCode();
+        exportedCodeBlock.textContent = fullCode;
+        codeModal.classList.remove("hidden");
+        codeModal.classList.add("flex");
+        copyToClipboardAndToast(fullCode);
+      });
+
+      document.getElementById("modalCopyBtn").addEventListener("click", () => {
+        const fullCode = generateFullNextJsComponentCode();
+        copyToClipboardAndToast(fullCode);
+      });
+
+      document.getElementById("closeModalBtn").addEventListener("click", () => {
+        codeModal.classList.add("hidden");
+        codeModal.classList.remove("flex");
+      });
+
+      codeModal.addEventListener("click", (e) => {
+        if (e.target === codeModal) {
+          codeModal.classList.add("hidden");
+          codeModal.classList.remove("flex");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
